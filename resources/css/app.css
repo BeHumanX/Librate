@@ -1,0 +1,18 @@
+@font-face {
+  font-family: 'Monofonto';
+  src: url('/fonts/monofonto-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Override default fonts */
+@layer base {
+  html, body {
+    font-family: 'Monofonto', sans-serif !important;
+  }
+}
+
