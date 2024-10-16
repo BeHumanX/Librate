@@ -32,4 +32,4 @@ Route::post('/books/{book}/maintenance', [BookController::class, 'maintenance'])
 Route::post('/borrows', [BorrowController::class, 'borrowBook'])->name('borrows.borrow');
 Route::post('/borrows/{borrow}/return', [BorrowController::class, 'returnBook'])->name('borrows.return');
 Route::get('/borrows', [BorrowController::class, 'index'])->name('borrows.index');
-Route::get('/user/borrowed-books', [BorrowController::class, 'userBorrowedBooks'])->name('borrows.user');
+Route::get('/user/borrowed-books', [ProfileController::class, 'userBorrowedBooks'])->name('borrows.user');

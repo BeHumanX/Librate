@@ -19,15 +19,12 @@ interface BooksProps {
 }
 
 const Books: React.FC<BooksProps> = ({ books, setBooks, onHandleBook, categories }) => {
-    const [newBook, setNewBook] = useState<Book>({
-        id: 0,
+    const [newBook, setNewBook] = useState<Omit<Book, 'id' | 'status'>>({
         title: "",
         author: "",
         publisher: "",
         year: 0,
-        category_id: 0,
-        status: "available",
-    });
+        category_id: 0,    });
     const [editingBook, setEditingBook] = useState<Book | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
@@ -48,7 +45,13 @@ const Books: React.FC<BooksProps> = ({ books, setBooks, onHandleBook, categories
         try {
             const response = await axios.post("/books", newBook);
             setBooks([...books, response.data]);
-            setNewBook({ id: 0, title: "", author: "", publisher: "", year: 0, category_id: 0, status: "" });
+            setNewBook({
+                title: "",
+                author: "",
+                publisher: "",
+                year: 0,
+                category_id: 0,
+            });
             setIsModalOpen(false);
             onHandleBook();
         } catch (error) {

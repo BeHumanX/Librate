@@ -10,7 +10,11 @@ class BookController extends Controller
 {
     public function index(): JsonResponse
     {
-        $books = Book::with('category')->paginate(10);
+        $books = Book::with(['category' => function($query) {
+            $query->select('id', 'name');
+        }])
+        ->select('id', 'title', 'author', 'publisher', 'year', 'category_id', 'status')
+        ->paginate(10);
         return response()->json($books, 200);
     }
 
@@ -25,7 +29,6 @@ class BookController extends Controller
             'publisher' => 'required|string|max:255',
             'year' => 'required|integer|min:1000|max:' . (date('Y') + 1),
             'category_id' => 'required|exists:categories,id',
-            'status' => 'required|in:available,borrowed,maintenance',
         ]);
 
         $book = Book::with('category')->create($validatedData);

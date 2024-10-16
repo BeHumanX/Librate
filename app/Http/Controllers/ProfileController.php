@@ -22,11 +22,13 @@ class ProfileController extends Controller
      */
     public function indexUser(): JsonResponse
     {
-        $books = Book::where('status', 'available')
-                     ->with('category')
-                     ->groupBy('title', 'author', 'publisher', 'year') // Group by these fields
-                     ->select('id', 'title', 'author', 'publisher', 'year', 'category_id', 'status')
-                     ->paginate(10);
+        $books = Book::with(['category' => function($query) {
+            $query->select('id', 'name');
+        }])
+        ->where('status', 'available')
+        ->groupBy('title', 'author', 'publisher', 'year') // Group by these fields
+        ->select('id', 'title', 'author', 'publisher', 'year', 'category_id', 'status')
+        ->paginate(10);
         return response()->json($books, 200);
     }
     public function adminDashboard(): JsonResponse
@@ -41,19 +43,31 @@ class ProfileController extends Controller
             'borrow_count' => $borrowCount
         ], 200);
     }
-
-    public function borrowedBooksCount(Request $request): JsonResponse
+    public function userBorrowedBooks(Request $request): JsonResponse
     {
-        if (!Gate::allows('isUser', $request->user())) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
-        $count = Borrow::where('user_id', $request->user()->id)
-                       ->whereNull('returned_at')
-                       ->count();
-
-        return response()->json(['borrowed_books_count' => $count], 200);
+        $borrowedBooks = Borrow::where('user_id', $request->user()->id)
+                               ->whereHas('book', function ($query) {
+                                   $query->where('status', 'borrowed');
+                               })
+                               ->with(['book' => function ($query) {
+                                   $query->where('status', 'borrowed');
+                               }])
+                               ->get();
+        return response()->json($borrowedBooks);
     }
+
+    // public function borrowedBooksCount(Request $request): JsonResponse
+    // {
+    //     if (!Gate::allows('isUser', $request->user())) {
+    //         return response()->json(['error' => 'Unauthorized'], 403);
+    //     }
+
+    //     $count = Borrow::where('user_id', $request->user()->id)
+    //                    ->whereNull('returned_at')
+    //                    ->count();
+
+    //     return response()->json(['borrowed_books_count' => $count], 200);
+    // }
 
     /**
      * Display the user's profile form.

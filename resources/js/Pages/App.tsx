@@ -27,6 +27,7 @@ const App: React.FC = () => {
     const [borrowedBooks, setBorrowedBooks] = useState<Borrow[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
+    const [selectedBorrowId, setSelectedBorrowId] = useState<number | null>(null);
     const [returnDate, setReturnDate] = useState("");
 
     const fetchAvailableBooks = useCallback(async () => {
@@ -46,9 +47,16 @@ const App: React.FC = () => {
     const fetchBorrowedBooks = useCallback(async () => {
         try {
             const response = await axios.get<Borrow[]>('/user/borrowed-books');
-            setBorrowedBooks(response.data);
+            console.log('Borrowed books response:', response.data); // Add this line for debugging
+            if (Array.isArray(response.data)) {
+                setBorrowedBooks(response.data);
+            } else {
+                console.error('Unexpected response format:', response.data);
+                setBorrowedBooks([]);
+            }
         } catch (error) {
             console.error('Error fetching borrowed books:', error);
+            setBorrowedBooks([]);
         }
     }, []);
 
@@ -60,6 +68,15 @@ const App: React.FC = () => {
     const handleBorrowBook = (bookId: number) => {
         setSelectedBookId(bookId);
         setIsModalOpen(true);
+    };
+    const handleReturnBook = async (borrowId: number) => {
+        try {
+            await axios.post(`/borrows/${borrowId}/return`);
+            setBorrowedBooks(prevBooks => prevBooks.filter(book => book.id !== borrowId));
+            fetchAvailableBooks(); // Refresh available books after returning
+        } catch (error) {
+            console.error('Error returning book:', error);
+        }
     };
 
     const confirmBorrow = async () => {
@@ -81,6 +98,7 @@ const App: React.FC = () => {
             console.error('Error borrowing book:', error);
         }
     };
+    
 
     return (
         <div className="bg-background p-4">
@@ -112,17 +130,32 @@ const App: React.FC = () => {
                         <p>No available books found.</p>
                     )}
                 </div>
-                <div className="w-1/2 pl-4">
+                <div className="w-4/9 pl-4">
                     <h1 className="text-2xl font-bold mb-4 text-[#44475A]">Borrowed Books</h1>
-                    <ul className="divide-y divide-gray-200">
-                        {borrowedBooks.map((borrow) => (
-                            <li key={borrow.id} className="px-4 py-4 sm:px-6">
-                                <span className="text-lg font-medium text-[#44475A]">
-                                    Book ID: {borrow.book_id}, Borrowed: {borrow.borrow_date}, Return: {borrow.return_date}
-                                </span>
-                            </li>
-                        ))}
-                    </ul>
+                    {borrowedBooks.length > 0 ? (
+                        <ul className="divide-y divide-gray-200">
+                            {borrowedBooks.map((borrow) => (
+                                <li key={`borrow-${borrow.id}`} className="px-4 py-4 sm:px-6">
+                                    <div className="flex flex-col">
+                                        <span className="text-lg font-medium text-[#44475A]">{borrow.book.title}</span>
+                                        <span className="text-sm text-gray-600">by {borrow.book.author}</span>
+                                        <span className="text-sm text-gray-600">Year: {borrow.book.year}</span>
+                                        <span className="text-sm text-gray-600">Publisher: {borrow.book.publisher}</span>
+                                        <span className="text-sm text-gray-600">Borrowed: {borrow.borrow_date}</span>
+                                        <span className="text-sm text-gray-600">Return by: {borrow.return_date}</span>
+                                    </div>
+                                    <button
+                                        onClick={() => handleReturnBook(borrow.id)}
+                                        className="bg-primaryLight hover:bg-[#33374C] text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
+                                    >
+                                        Return
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>No borrowed books found.</p>
+                    )}
                 </div>
             </div>
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Borrow Book">
