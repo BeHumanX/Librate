@@ -27,7 +27,7 @@ const Books: React.FC<BooksProps> = ({ books, setBooks, onHandleBook, categories
         category_id: 0,    });
     const [editingBook, setEditingBook] = useState<Book | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
+    const [currentPage, setCurrentPage] = useState<number>(1);
     useEffect(() => {
         const fetchBooks = async () => {
             try {
@@ -85,6 +85,11 @@ const Books: React.FC<BooksProps> = ({ books, setBooks, onHandleBook, categories
         } catch (error) {
             console.error("Error deleting book:", error);
         }
+    };
+
+    const handlePageChange = (direction: 'prev' | 'next') => {
+        const newPage = direction === 'prev' ? currentPage - 1 : currentPage + 1;
+        setCurrentPage(newPage);
     };
 
     return (
@@ -316,6 +321,14 @@ const Books: React.FC<BooksProps> = ({ books, setBooks, onHandleBook, categories
                     )}
                 </tbody>
             </table>
+            <div className="mt-4 flex justify-center">
+                <button onClick={() => handlePageChange('prev')} className="bg-primaryLight hover:bg-[#33374C] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2">
+                    Previous
+                </button>
+                <button onClick={() => handlePageChange('next')} className="bg-primaryLight hover:bg-[#33374C] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-2">
+                    Next
+                </button>
+            </div>
         </div>
     );
 };
