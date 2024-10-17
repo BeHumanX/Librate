@@ -106,26 +106,26 @@ const App: React.FC = () => {
                 <div className="w-1/2 pr-4">
                     <h1 className="text-2xl font-bold mb-4 text-[#44475A]">Available Books</h1>
                     {Array.isArray(availableBooks) && availableBooks.length > 0 ? (
-                        <ul className="divide-y divide-gray-200">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {availableBooks.map((book) => (
-                                <li key={book.id} className="px-4 py-4 sm:px-6 flex justify-between items-center">
-                                    <div className="flex flex-col">
-                                        <span className="text-lg font-medium text-[#44475A]">{book.title}</span>
-                                        <span className="text-sm text-gray-600">by {book.author}</span>
-                                        <span className="text-sm text-gray-600">Year: {book.year}</span>
-                                        <span className="text-sm text-gray-600">Publisher: {book.publisher}</span>
-                                        <span className="text-sm text-gray-600">Category ID: {book.category_id}</span>
-                                        <span className="text-sm text-gray-600">Status: {book.status}</span>
+                                <div key={book.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                                    <div className="p-4">
+                                        <h3 className="text-lg font-medium text-[#44475A] mb-2">{book.title}</h3>
+                                        <p className="text-sm text-gray-600 mb-1">by {book.author}</p>
+                                        <p className="text-sm text-gray-600 mb-1">Year: {book.year}</p>
+                                        <p className="text-sm text-gray-600 mb-1">Publisher: {book.publisher}</p>
+                                        <p className="text-sm text-gray-600 mb-1">Category ID: {book.category_id}</p>
+                                        <p className="text-sm text-gray-600 mb-3">Status: {book.status}</p>
+                                        <button 
+                                            onClick={() => handleBorrowBook(book.id)}
+                                            className="w-full bg-primaryLight hover:bg-[#33374C] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                        >
+                                            Borrow
+                                        </button>
                                     </div>
-                                    <button 
-                                        onClick={() => handleBorrowBook(book.id)}
-                                        className="bg-primaryLight hover:bg-[#33374C] text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
-                                    >
-                                        Borrow
-                                    </button>
-                                </li>
+                                </div>
                             ))}
-                        </ul>
+                        </div>
                     ) : (
                         <p>No available books found.</p>
                     )}
@@ -135,14 +135,10 @@ const App: React.FC = () => {
                     {borrowedBooks.length > 0 ? (
                         <ul className="divide-y divide-gray-200">
                             {borrowedBooks.map((borrow) => (
-                                <li key={`borrow-${borrow.id}`} className="px-4 py-4 sm:px-6">
-                                    <div className="flex flex-col">
+                                <li key={`borrow-${borrow.id}`} className="px-4 py-4 sm:px-6 flex justify-between items-center">
+                                    <div>
                                         <span className="text-lg font-medium text-[#44475A]">{borrow.book.title}</span>
-                                        <span className="text-sm text-gray-600">by {borrow.book.author}</span>
-                                        <span className="text-sm text-gray-600">Year: {borrow.book.year}</span>
-                                        <span className="text-sm text-gray-600">Publisher: {borrow.book.publisher}</span>
-                                        <span className="text-sm text-gray-600">Borrowed: {borrow.borrow_date}</span>
-                                        <span className="text-sm text-gray-600">Return by: {borrow.return_date}</span>
+                                        <span className="text-sm text-gray-600 ml-2">Return by: {borrow.return_date}</span>
                                     </div>
                                     <button
                                         onClick={() => handleReturnBook(borrow.id)}
