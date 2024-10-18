@@ -57,7 +57,7 @@ DB_PASSWORD="<password>"
 
 - Seed the database for admin configuration
 ```
-
+php artisan db:seed
 ```
 
 - Install the NPM dependencies.
