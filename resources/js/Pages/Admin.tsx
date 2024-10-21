@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Routes, Route, BrowserRouter, Link, Outlet } from "react-router-dom";
+import { Routes, Route, BrowserRouter, Link} from "react-router-dom";
 import { lazy, Suspense } from "react";
 import Loader from "../../../public/src2/common/Loader/index";
 import axios from "axios";
