@@ -19,6 +19,14 @@ interface Book {
     status: string;
 }
 
+interface Borrow {
+    id: number;
+    user_id: number;
+    book_id: number;
+    borrow_date: string;
+    return_date: string;
+}
+
 interface DashboardData {
     book_count: number;
     category_count: number;
@@ -26,7 +34,7 @@ interface DashboardData {
 }
 const Categories = lazy(() => import("./Admin/Categories"));
 const Books = lazy(() => import("./Admin/Books"));
-
+const Borrow = lazy(() => import("./Admin/Borrow"));
 const Admin: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
