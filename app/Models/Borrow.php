@@ -13,9 +13,9 @@ class Borrow extends Model
         'book_id',
         'user_id',
         'borrow_date',
-        'return_date'
+        'return_date',
+        'returned_at'
     ];
-
     public function book()
     {
         return $this->belongsTo(Book::class);

@@ -50,11 +50,29 @@ it('successfuly borrow a book for user', function () {
     $this->assertDatabaseHas('borrows', ['id' => $borrowId]);
 });
 
-it('successfuly returns a borrow', function (){
+it('successfully returns a borrow', function () {
     $this->book->update(['status' => 'borrowed']);
     $borrow = Borrow::factory()->create([
         'book_id' => $this->book->id,
+        'user_id' => $this->normalUser->id,
         'borrow_date' => Carbon::now(),
-        'return_date' => Carbon::now()->addDays(rand(1, 10)), 
+        'return_date' => Carbon::now()->addDays(rand(1, 10)),
+        'returned_at' => null,
+    ]);
+    $response = $this->actingAs($this->normalUser)
+                    ->putJson("/borrows/{$borrow->id}/return");
+    $response->assertStatus(JsonResponse::HTTP_OK);
+
+    $borrow->refresh();
+    $this->book->refresh();
+
+    $this->assertNotNull($borrow->returned_at, 'Returned at should be set');
+    $this->assertEquals('available', $this->book->status, 'Book status should be available');
+    
+    $this->assertDatabaseHas('borrows', [
+        'id' => $borrow->id,
+        'book_id' => $this->book->id,
+        'user_id' => $this->normalUser->id,
+
     ]);
 });
