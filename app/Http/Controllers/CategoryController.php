@@ -16,8 +16,8 @@ class CategoryController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        if(auth()->user()->role !== 'admin'){
-            return response()->json(['error' => 'You are not authorized to add categories'], 403);
+        if(auth()->user()->role == 'user'){
+            return response()->json(['error' => 'You are not authorized to add category'], 403);
         }
         $validatedData = $request->validate([
             'name' => 'required|string|max:255|unique:categories',

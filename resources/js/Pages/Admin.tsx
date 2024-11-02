@@ -32,6 +32,8 @@ interface DashboardData {
     category_count: number;
     borrow_count: number;
 }
+
+
 const Categories = lazy(() => import("./Admin/Categories"));
 const Books = lazy(() => import("./Admin/Books"));
 const Borrow = lazy(() => import("./Admin/Borrow"));
@@ -41,6 +43,7 @@ const Admin: React.FC = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [books, setBooks] = useState<Book[]>([]);
     const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+    const [borrows, setBorrows] = useState<Borrow[]>([]);
 
     const toggleMobileMenu = useCallback(() => {
         setMobileMenuOpen(prev => !prev);
@@ -88,7 +91,11 @@ const Admin: React.FC = () => {
                                         onHandleBook={fetchDashboardData} 
                                         categories={categories} 
                                     />} />
-                                    <Route path="/borrows" element={<Borrows />} />
+                                    <Route path="/admin/borrows" element={<Borrow 
+                                        borrows={borrows}
+                                        books={books}
+                                        setBorrows={setBorrows}
+                                    />} />
                                 </Routes>
                             </Suspense>
                         </div>
@@ -182,13 +189,6 @@ const Dashboard: React.FC<{ dashboardData: DashboardData | null }> = ({ dashboar
         ) : (
             <p>Loading dashboard data...</p>
         )}
-    </div>
-);
-
-const Borrows: React.FC = () => (
-    <div className="bg-default p-4">
-        <h1 className="text-2xl font-bold mb-4">Borrows Management</h1>
-        <p>Here you can manage book borrowings.</p>
     </div>
 );
 

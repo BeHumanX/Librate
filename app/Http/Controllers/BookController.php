@@ -21,7 +21,7 @@ class BookController extends Controller
     public function store(Request $request): JsonResponse
     {
         if(auth()->user()->role == 'user'){
-            return response()->json(['error' => 'You are not authorized to add books'], 403);
+            return response()->json(['error' => 'You are not authorized to add book'], 403);
         }
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
@@ -54,7 +54,8 @@ class BookController extends Controller
             'status' => 'sometimes|required|in:available,borrowed,maintenance',
         ]);
 
-        $book->with('category')->update($validatedData);
+        $book->update($validatedData);
+        $book->load('category');
         return response()->json($book, 200);
     }
 
