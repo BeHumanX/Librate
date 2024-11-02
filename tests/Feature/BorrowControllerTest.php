@@ -11,12 +11,8 @@ use Illuminate\Support\Facades\Log;
 
 uses(RefreshDatabase::class);
 beforeEach(function () {
-    // Create a user with admin role for authorization tests
     $this->adminUser = User::factory()->create(['role' => 'admin']);
-    // Create a user with user role for authorization tests
     $this->normalUser = User::factory()->create(['role' => 'user']);
-
-    // Create a category for testing
     $this->book = Book::factory()->create();
 });
 
@@ -34,7 +30,6 @@ it('returns borrows on index', function () {
     ]);
 });
 it('successfuly borrow a book for user', function () {
-    // Ensure the book is available for borrowing
     $this->book->update(['status' => 'available']);
     $borrowData = [
         'book_id' => $this->book->id, 
@@ -45,7 +40,6 @@ it('successfuly borrow a book for user', function () {
     $response->assertStatus(JsonResponse::HTTP_CREATED)
              ->assertJsonFragment(['book_id' => $this->book->id]);
 
-    // Retrieve the borrow ID from the response
     $borrowId = $response->json('borrow.id');
     $this->assertDatabaseHas('borrows', ['id' => $borrowId]);
 });
@@ -62,17 +56,33 @@ it('successfully returns a borrow', function () {
     $response = $this->actingAs($this->normalUser)
                     ->putJson("/borrows/{$borrow->id}/return");
     $response->assertStatus(JsonResponse::HTTP_OK);
-
     $borrow->refresh();
     $this->book->refresh();
-
     $this->assertNotNull($borrow->returned_at, 'Returned at should be set');
     $this->assertEquals('available', $this->book->status, 'Book status should be available');
-    
     $this->assertDatabaseHas('borrows', [
         'id' => $borrow->id,
         'book_id' => $this->book->id,
         'user_id' => $this->normalUser->id,
-
     ]);
 });
+it('fails to return a borrow that has already been returned', function () {
+    $this->book->update(['status' => 'borrowed']);
+    $borrow = Borrow::factory()->create([
+        'book_id' => $this->book->id,
+        'user_id' => $this->normalUser->id,
+        'returned_at' => Carbon::now(),
+    ]);
+    $response = $this->actingAs($this->normalUser)
+                    ->putJson("/borrows/{$borrow->id}/return");
+    $response->assertStatus(JsonResponse::HTTP_BAD_REQUEST);
+});
+it('forbids admin from borrowing a book', function () {
+    $borrowData = [
+        'book_id' => $this->book->id, 
+        'borrow_date' => Carbon::now(),
+        'return_date' => Carbon::now()->addDays(rand(1, 10)), 
+    ];
+    $response = $this->actingAs($this->adminUser)->postJson('/borrows', $borrowData);
+    $response->assertStatus(JsonResponse::HTTP_FORBIDDEN);
+}); 

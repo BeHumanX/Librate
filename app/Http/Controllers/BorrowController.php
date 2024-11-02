@@ -19,6 +19,9 @@ class BorrowController extends Controller
 
     public function borrowBook(Request $request): JsonResponse
     {
+        if (auth()->user()->role === 'admin') {
+            return response()->json(['error' => 'Admins cannot borrow books'], 403);
+        }
         $validatedData = $request->validate([
             'book_id' => 'required|exists:books,id',
             'borrow_date' => 'required|date',
@@ -53,7 +56,6 @@ class BorrowController extends Controller
         if ($borrow->returned_at) {
             return response()->json(['error' => 'Book has already been returned'], 400);
         }
-
         $borrow->update([
             'returned_at' => now(),
         ]);
